@@ -1,0 +1,163 @@
+swagger: "2.0"
+info:
+  description: "This is a simple API documentation for Book Managing. School project"
+  version: "1.0.0"
+  title: "Book Managing"
+tags:
+- name: "books"
+  description: "API services related with books"
+- name: "reviews"
+  description: "API services related with book reviews"
+schemes:
+- "http"
+paths:
+  /books:
+    get:
+      tags:
+        - "books"
+      summary: "Search for books"
+      description: "Search for all books stored, this search can be filtered by some parameters. In case more than one parameter is defined both filters are applied for the result."
+      parameters:
+        - name: "title"
+          description: "Search filtered by title"
+          required: false
+          in: "query"
+          type: "string"
+        - name: "author"
+          description: "Search filtered by author"
+          required: false
+          in: "query"
+          type: "string"
+        - name: "keyword"
+          description: "Search filtered by keywords"
+          in: "query"
+          type: string
+      responses:
+        '200':
+          description: "Success operation, return a list of books. If no book was found, this function returns an empty array."
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/BookResult"
+  /books/{isbn}:
+    get:
+      tags:
+        - "books"
+      summary: "Search for a specific book"
+      parameters:
+        - name: isbn
+          description: ISBN code to be filtered. Is a unique code per book.
+          required: true
+          type: "string"
+          in: "path"
+      responses:
+        '200':
+          description: "Success operation, return the selected book."
+          schema:
+            $ref: "#/definitions/Book"
+        '204':
+          description: "No content. No book was found with this isbn code."
+  /books/{isbn}/reviews:
+    get:
+      tags:
+        - "reviews"
+      summary: "Return all reviews of a specific book"
+      description: This operation must be filtered by some ISBN code in query parameter 
+      parameters:
+        - name: isbn
+          description: ISBN code to be filtered
+          required: true
+          type: "integer"
+          in: "path"
+      responses:
+        '200':
+          description: "Success operation. Return a list of reviews of a specific Book"
+          schema:
+            $ref: "#/definitions/Reviews"
+        '404':
+          description: "No book was found with this isbn code."
+definitions:
+  BookResult:
+    type: object
+    properties:
+      "resultSearch":
+        description: "All the books from the search"
+        type: array
+        items:
+          $ref: "#/definitions/Book"
+      "countResult":
+        description: "The number of book from the search"
+        type: integer
+      "links":
+        description: "Links like HATEOAS style, name and href. The link newBook only appears when no Book was found."
+        type: array
+        enum: [newBook]
+        items:
+          $ref: "#/definitions/Link"
+  Book:
+    type: object
+    properties:
+      "isbn":
+        type: string
+        description: "The identifier of a book"
+      "title":
+        type: string
+      "description":
+        type: string
+        description: "A description of the book"
+      "authors":
+        description: "List of authors"
+        type: array
+        items:
+          type: string
+      "keywords":
+        description: "List of keywords related with the book"
+        type: array
+        items:
+          type: string
+      "reviews":
+        description: "List of reviews related with the book"
+        type: array
+        items:
+          type: string  
+      "publicationYear":
+        description: "The year of the book's publication"
+        type: integer
+      "edition":
+        type: integer
+        description: "the edition of the book"
+      "editorCompany":
+        type: string
+        description: "the name of the company who edited the book"
+      "bookDescription":
+        type: string
+        description: "a summary of book's story"
+      "links":
+        description: "Links like HATEOAS style, name and href "
+        type: array
+        enum: [self, relatedBook]
+        items:
+          $ref: "#/definitions/Link"
+  Link:
+    type: object
+    properties:
+      "rel":
+        description: "Name of de relational link"
+        type: string
+      "href":
+        description: "URL of the relational link"
+        type: string 
+  Reviews:
+    type: object
+    properties:
+      "reviews":
+        type: array
+        description: "All the reviews of a specific book"
+        items:
+          type: string
+      "links":
+        description: "Links like HATEOAS style, name and href "
+        type: array
+        enum: [book, newReview]
+        items:
+          $ref: "#/definitions/Link" 
